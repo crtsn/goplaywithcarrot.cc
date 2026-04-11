@@ -1,18 +1,15 @@
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    var discord_request = false;
+    var only_image = false;
     const r2 = env.MY_BUCKET;
     const default_img = await r2.get('512x512_tile64.png');
 
     console.log("URL: " + url);
     let user_agent = request.headers.get("user-agent");
-    if (user_agent)
-    {
-      console.log("User-Agent: " + user_agent);
-    }
+    only_image = user_agent && user_agent.includes("Discordbot");
 
-    if (discord_request)
+    if (only_image)
     {
       if (default_img) {
         return new Response(default_img.body, {
