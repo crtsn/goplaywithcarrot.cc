@@ -23,7 +23,7 @@ export default {
         });
       }
     }
-  
+
     const html = `<!DOCTYPE html>
     <body>
       <h1>Meet players:</h1>
@@ -32,6 +32,7 @@ export default {
       <ul><li><a href="http://🐇.goplaywithcarrot.cc">🐇</a></li></ul>
       <ul><li><a href="http://🐸.goplaywithcarrot.cc">🐸</a></li></ul>
       <ul><li><a href="http://🦔.goplaywithcarrot.cc">🦔</a></li></ul>
+	  <img src="?i=1">
     </body>`;
 
     return new Response(html, {
