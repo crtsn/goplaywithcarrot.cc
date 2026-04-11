@@ -1,0 +1,55 @@
+{
+  "name": "aboba",
+  "main": "src/worker.js",
+  "workers_dev": true,
+  "preview_urls": false,
+  "compatibility_date": "2026-04-09",
+  "routes": [
+    {
+      "pattern": "goplaywithcarrot.cc",
+      "zone_name": "goplaywithcarrot.cc",
+      "custom_domain": true
+    },
+    {
+      "pattern": "xn--4o8h.goplaywithcarrot.cc",
+      "zone_name": "goplaywithcarrot.cc",
+      "custom_domain": true
+    },
+    {
+      "pattern": "xn--yn8h.goplaywithcarrot.cc",
+      "zone_name": "goplaywithcarrot.cc",
+      "custom_domain": true
+    },
+    {
+      "pattern": "xn--dp8h.goplaywithcarrot.cc",
+      "zone_name": "goplaywithcarrot.cc",
+      "custom_domain": true
+    },
+    {
+      "pattern": "xn--kt9h.goplaywithcarrot.cc",
+      "zone_name": "goplaywithcarrot.cc",
+      "custom_domain": true
+    }
+  ],
+  "observability": {
+    "enabled": false,
+    "head_sampling_rate": 1,
+    "logs": {
+      "enabled": true,
+      "head_sampling_rate": 1,
+      "persist": true,
+      "invocation_logs": true
+    },
+    "traces": {
+      "enabled": false,
+      "persist": true,
+      "head_sampling_rate": 1
+    }
+  },
+  "r2_buckets": [
+    {
+      "binding": "MY_BUCKET",
+      "bucket_name": "images"
+    }
+  ]
+}
