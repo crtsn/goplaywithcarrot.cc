@@ -1,7 +1,5 @@
-import { env } from "cloudflare:workers";
-
 export default {
-  async fetch(request, env): Promise<Response> {
+  async fetch(request, env) {
     const url = new URL(request.url);
     var only_image = false;
     const r2 = env.MY_BUCKET;
@@ -23,13 +21,10 @@ export default {
       }
     }
 
-    console.log("SECRET test: ", env.test);
-
     const html = `<!DOCTYPE html>
     <body>
       <h1>Meet players:</h1>
       <p>URL used: ${url}</p>
-      <p>Secret named test: ${env.test}</p>
       <ul><li><a href="http://🐰.goplaywithcarrot.cc">🐰</a></li></ul>
       <ul><li><a href="http://🐇.goplaywithcarrot.cc">🐇</a></li></ul>
       <ul><li><a href="http://🐸.goplaywithcarrot.cc">🐸</a></li></ul>
@@ -43,4 +38,4 @@ export default {
       },
     });
   },
-} satisfies ExportedHandler;
+};
