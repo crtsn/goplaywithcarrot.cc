@@ -7,11 +7,11 @@
     "dev": "wrangler dev",
     "start": "wrangler dev",
      "dev:all": "concurrently -n \"main,sub1,sub2,sub3,sub4\" -c \"white,blue,green,magenta,cyan\" \"npm run dev:main\" \"npm run dev:sub1\" \"npm run dev:sub2\" \"npm run dev:sub3\" \"npm run dev:sub4\"",
-    "dev:main": "wrangler dev --local --host localhost --port 8787  --inspector-port 9229",
-    "dev:sub1": "wrangler dev --local --host xn--4o8h.localhost --port 8788  --inspector-port 9230",
-    "dev:sub2": "wrangler dev --local --host xn--yn8h.localhost --port 8789  --inspector-port 9231",
-    "dev:sub3": "wrangler dev --local --host xn--dp8h.localhost --port 8790  --inspector-port 9232",
-    "dev:sub4": "wrangler dev --local --host xn--kt9h.localhost --port 8791  --inspector-port 9233"
+    "dev:main": "wrangler dev --remote --host localhost --port 8787  --inspector-port 9229",
+    "dev:sub1": "wrangler dev --remote --host xn--4o8h.localhost --port 8788  --inspector-port 9230",
+    "dev:sub2": "wrangler dev --remote --host xn--yn8h.localhost --port 8789  --inspector-port 9231",
+    "dev:sub3": "wrangler dev --remote --host xn--dp8h.localhost --port 8790  --inspector-port 9232",
+    "dev:sub4": "wrangler dev --remote --host xn--kt9h.localhost --port 8791  --inspector-port 9233"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260411.1",

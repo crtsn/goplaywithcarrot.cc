@@ -1,4 +1,5 @@
 interface Env {
+  IMAGES: ImagesBinding;
   ASSETS: Fetcher;
 }
 
@@ -36,20 +37,31 @@ export default {
 
       switch(subdomain) {
         case "xn--4o8h":
-          img_url = "img/rabbit.png";
+          img_url = "rabbit.png";
           break;
         case "xn--yn8h":
-          img_url = "img/rabbit2.png";
+          img_url = "rabbit2.png";
           break;
         case "xn--dp8h":
-          img_url = "img/frog.png";
+          img_url = "frog.png";
           break;
         default:
-          img_url = "img/hedgehog.png";
+          img_url = "hedgehog.png";
       }
       let img_request = new Request(`http://${baseHost}/${img_url}`);
-      const assetResponse = await env.ASSETS.fetch(img_request);
-      return assetResponse;
+      const character_resp = await env.ASSETS.fetch(img_request);
+      if (!character_resp.ok) return new Response(`NOT FOUND: http://${baseHost}/${img_url}`, { status: 404 });
+      const characterStream = character_resp.body;
+
+      let map_request = new Request(`http://${baseHost}/map.png`);
+      const map_resp = await env.ASSETS.fetch(map_request);
+      if (!map_resp.ok) return new Response(`NOT FOUND: http://${baseHost}/map.png`, { status: 404 });
+      const mapStream = map_resp.body;
+      return (
+        await env.IMAGES.input(mapStream)
+          .draw(characterStream, { top: 250 / 2 - 72 / 2, left: 250 / 2 - 72 / 2 })
+          .output({ format: "image/png" })
+        ).response();
     }
 
     const html = `<!DOCTYPE html>
