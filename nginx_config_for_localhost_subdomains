@@ -1,0 +1,50 @@
+server {
+    listen 127.0.0.1:80;
+    server_name localhost;
+
+    location / {
+        proxy_pass http://localhost:8787;
+        proxy_set_header Host $host;
+    }
+}
+
+server {
+    listen 127.0.0.1:80;
+    server_name xn--4o8h.localhost;
+
+    location / {
+        proxy_pass http://localhost:8788;
+        proxy_set_header Host $host;
+    }
+}
+
+server {
+    listen 127.0.0.1:80;
+    server_name xn--yn8h.localhost;
+
+    location / {
+        proxy_pass http://localhost:8789;
+        proxy_set_header Host $host;
+    }
+}
+
+server {
+    listen 127.0.0.1:80;
+    server_name xn--dp8h.localhost;
+
+    location / {
+        proxy_pass http://localhost:8790;
+        proxy_set_header Host $host;
+    }
+}
+
+server {
+    listen 127.0.0.1:80;
+    server_name xn--kt9h.localhost;
+
+    location / {
+        proxy_pass http://localhost:8791;
+        proxy_set_header Host $host;
+    }
+}
+
