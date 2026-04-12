@@ -1,6 +1,6 @@
 {
   "name": "aboba",
-  "main": "src/worker.js",
+  "main": "src/worker.ts",
   "workers_dev": true,
   "preview_urls": false,
   "compatibility_date": "2026-04-09",
@@ -51,5 +51,8 @@
       "binding": "MY_BUCKET",
       "bucket_name": "images"
     }
-  ]
+  ],
+	  "secrets": {
+    "required": ["test"]
+  }
 }

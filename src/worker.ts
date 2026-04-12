@@ -1,5 +1,14 @@
+interface Env {
+  MY_BUCKET: R2Bucket;
+  test: string;
+}
+
 export default {
-  async fetch(request, env) {
+  async fetch(
+    request: Request,
+    env: Env,
+    ctx: ExecutionContext
+  ): Promise<Response> {
     const url = new URL(request.url);
     var only_image = false;
     const r2 = env.MY_BUCKET;
@@ -38,4 +47,4 @@ export default {
       },
     });
   },
-};
+} satisfies ExportedHandler<Env>;
