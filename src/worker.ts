@@ -25,7 +25,7 @@ export default {
         return new Response(default_img.body, {
           headers: {
             'Content-Type': default_img.httpMetadata.contentType || 'image/png',
-            'Cache-Control': 'public, max-age=31536000',
+            'Cache-Control': 'public, max-age=3600',
           },
         });
       }
@@ -33,13 +33,18 @@ export default {
 
     const html = `<!DOCTYPE html>
     <body>
-      <h1>Meet players:</h1>
+      <a href="http://goplaywithcarrot.cc">goplaywithcarrot.cc</a>
       <p>URL used: ${url}</p>
-      <ul><li><a href="http://🐰.goplaywithcarrot.cc">🐰</a></li></ul>
-      <ul><li><a href="http://🐇.goplaywithcarrot.cc">🐇</a></li></ul>
-      <ul><li><a href="http://🐸.goplaywithcarrot.cc">🐸</a></li></ul>
-      <ul><li><a href="http://🦔.goplaywithcarrot.cc">🦔</a></li></ul>
-	  <img src="?i=1">
+      <div style="display: flex; align-items: center;">
+        <h1>Meet players:</h1>
+        <div style="display: flex; align-items: center;">
+          <a href="http://\u{1F430}.goplaywithcarrot.cc">\u{1F430}</a>
+          <a href="http://\u{1F407}.goplaywithcarrot.cc">\u{1F407}</a>
+          <a href="http://\u{1F438}.goplaywithcarrot.cc">\u{1F438}</a>
+          <a href="http://\u{1F994}.goplaywithcarrot.cc">\u{1F994}</a>
+        </div>
+      </div>
+	    <img src="?i=1">
     </body>`;
 
     return new Response(html, {
