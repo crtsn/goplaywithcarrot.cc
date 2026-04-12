@@ -51,8 +51,5 @@
       "binding": "MY_BUCKET",
       "bucket_name": "images"
     }
-  ],
-	  "secrets": {
-    "required": ["test"]
-  }
+  ]
 }
