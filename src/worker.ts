@@ -17,6 +17,7 @@ export default {
     console.log("URL: " + url);
     let user_agent = request.headers.get("user-agent");
     only_image = user_agent && user_agent.includes("Discordbot");
+    only_image = only_image || (url.searchParams.get("i") != null);
 
     if (only_image)
     {
@@ -30,13 +31,10 @@ export default {
       }
     }
 
-    console.log(`SECRET test: ${env.test}`)
-
     const html = `<!DOCTYPE html>
     <body>
       <h1>Meet players:</h1>
       <p>URL used: ${url}</p>
-      <p>SECRET test: ${env.test}</p>
       <ul><li><a href="http://🐰.goplaywithcarrot.cc">🐰</a></li></ul>
       <ul><li><a href="http://🐇.goplaywithcarrot.cc">🐇</a></li></ul>
       <ul><li><a href="http://🐸.goplaywithcarrot.cc">🐸</a></li></ul>
