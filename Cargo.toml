@@ -10,3 +10,4 @@ crate-type = ["cdylib"]
 [dependencies]
 worker = { version = "0.8" }
 worker-macros = { version = "0.8" }
+
