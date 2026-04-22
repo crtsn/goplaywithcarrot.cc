@@ -5,7 +5,7 @@
   "preview_urls": false,
   "compatibility_date": "2026-04-09",
   "build": {
-    "command": "cargo +nightly install \"worker-build@^0.8\" && worker-build --release --panic-unwind"
+    "command": "cargo +nightly install \"worker-build@^0.8\" && RUSTFLAGS=\"-C target-feature=+simd128\" worker-build --release --panic-unwind"
   },
   "routes": [
     {
