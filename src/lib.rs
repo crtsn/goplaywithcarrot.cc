@@ -32,50 +32,24 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
 
     console_log!("only_image: {only_image}");
     if only_image {
-        let img_url = match subdomain {
-          Some("xn--4o8h") => "rabbit.png",
-          Some("xn--yn8h") => "rabbit2.png",
-          Some("xn--dp8h") => "frog.png",
-          _ => "hedgehog.png",
+        static MAP_RAW: &[u8] = include_bytes!("../public/map.raw");
+        static RABBIT_RAW: &[u8] = include_bytes!("../public/rabbit.raw");
+        static RABBIT2_RAW: &[u8] = include_bytes!("../public/rabbit2.raw");
+        static FROG_RAW: &[u8] = include_bytes!("../public/frog.raw");
+        static HEDGEHOG_RAW: &[u8] = include_bytes!("../public/hedgehog.raw");
+
+        let char_data = match subdomain {
+          Some("xn--4o8h") => RABBIT_RAW,
+          Some("xn--yn8h") => RABBIT2_RAW,
+          Some("xn--dp8h") => FROG_RAW,
+          _ => HEDGEHOG_RAW,
         };
-        let img_request = format!("http://{base_host}/{img_url}");
-        let character_resp = env.assets("ASSETS")?.fetch(img_request, None).await;
-        if let Ok(mut character) = character_resp {
-            let character_stream = character.bytes().await?;
+        let mut canvas = MAP_RAW.to_vec();
+        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 10, 10);
+        let bmp_bytes = encode_bmp_fast(&canvas, 250, 250);
+        let bmp_size = bmp_bytes.len();
 
-            let map_request = format!("http://{base_host}/map.png");
-            let map_resp = env.assets("ASSETS")?.fetch(map_request, None).await;
-
-            if let Ok(mut map) = map_resp {
-                let map_stream = map.bytes().await?;
-
-                let bg_decoded = load_from_memory(&map_stream)
-                                    .map_err(|e| worker::Error::from(e.to_string()))?
-                                    .to_rgba8();
-                let (width, height) = (bg_decoded.width(), bg_decoded.height());
-                let mut pixmap = Pixmap::from_vec(
-                    bg_decoded.into_raw(),
-                    IntSize::from_wh(width, height).unwrap()
-                ).unwrap();
-                let overlay_data = Pixmap::decode_png(&character_stream).unwrap();
-                let paint = Paint::default();
-                pixmap.draw_pixmap(
-                    10, 10,
-                    overlay_data.as_ref(),
-                    &PixmapPaint::default(),
-                    Transform::identity(),
-                    None,
-                );
-                let bmp_bytes = encode_bmp_fast(pixmap.data(), width, height);
-
-                return Ok(Response::from_bytes(bmp_bytes)?
-                    .with_headers(headers_with_bmp()));
-            } else {
-                return Response::error(format!("NOT FOUND: http://{base_host}/map.png"), 404);
-            }
-        } else {
-            return Response::error(format!("NOT FOUND: http://{base_host}/{img_url}"), 404);
-        }
+        return Ok(Response::from_bytes(bmp_bytes)?.with_headers(headers_with_bmp(bmp_size)));
     }
 
     let html = format!(
@@ -101,6 +75,30 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         char4 = "\u{1F994}"
     );
     Response::from_html(html)
+}
+
+
+fn fast_raw_overlay(base: &mut [u8], base_w: u32, top: &[u8], top_w: u32, top_h: u32, ox: u32, oy: u32) {
+    for y in 0..top_h {
+        for x in 0..top_w {
+            let top_idx = ((y * top_w + x) * 4) as usize;
+            let base_idx = (((y + oy) * base_w + (x + ox)) * 4) as usize;
+
+            let alpha = top[top_idx + 3] as f32 / 255.0;
+
+            if alpha >= 1.0 {
+                // Fully opaque: Direct copy
+                base[base_idx..base_idx + 3].copy_from_slice(&top[top_idx..top_idx + 3]);
+            } else if alpha > 0.0 {
+                // Alpha blend
+                for i in 0..3 {
+                    base[base_idx + i] = ((top[top_idx + i] as f32 * alpha) +
+                                         (base[base_idx + i] as f32 * (1.0 - alpha))) as u8;
+                }
+            }
+            // If alpha is 0.0, we do nothing (transparent)
+        }
+    }
 }
 
 // Minimal BMP encoder to save CPU (No compression)
@@ -137,9 +135,10 @@ fn encode_bmp_fast(rgba_pixels: &[u8], width: u32, height: u32) -> Vec<u8> {
     bmp
 }
 
-fn headers_with_bmp() -> Headers {
+fn headers_with_bmp(bmp_size: usize) -> Headers {
     let mut h = Headers::new();
     h.set("Content-Type", "image/bmp").unwrap();
+    h.set("Content-Length", &bmp_size.to_string()).unwrap();
     h
 }
 
