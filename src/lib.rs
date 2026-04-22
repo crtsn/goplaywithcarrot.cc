@@ -45,12 +45,12 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
           _ => HEDGEHOG_RAW,
         };
         let mut canvas = MAP_RAW.to_vec();
-        fast_raw_overlay(&mut canvas, 72, &char_data, 72, 72, 10, 10);
+        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 10, 10);
         // let bmp_bytes = encode_bmp_fast(&canvas, 72, 72);
         // let bmp_size = bmp_bytes.len();
         // return Ok(Response::from_bytes(bmp_bytes)?.with_headers(headers_with_bmp(bmp_size)));
 
-        let png_bytes = encode_png_manual(&canvas, 72, 72);
+        let png_bytes = encode_png_manual(&canvas, 250, 250);
         let png_size = png_bytes.len();
         return Ok(Response::from_bytes(png_bytes)?.with_headers(headers_with_png(png_size)));
     }
