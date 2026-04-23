@@ -53,5 +53,12 @@
     "directory": "./public",
     "binding": "ASSETS",
     "run_worker_first": true
-  }
+  },
+  "d1_databases": [
+  	{
+		"binding": "game_db",
+		"database_name": "db",
+		"database_id": "737709b1-f937-42cb-92c7-6d517047735c"
+  	}
+  ]
 }

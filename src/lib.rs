@@ -1,6 +1,11 @@
 use worker::*;
-use tiny_skia::*;
-use image::load_from_memory;
+use serde::Deserialize;
+
+#[derive(Deserialize, Debug)]
+struct Position {
+    x: u32,
+    y: u32,
+}
 
 #[event(fetch)]
 async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
@@ -37,21 +42,44 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         static RABBIT2_RAW: &[u8] = include_bytes!("../public/rabbit2.raw");
         static FROG_RAW: &[u8] = include_bytes!("../public/frog.raw");
         static HEDGEHOG_RAW: &[u8] = include_bytes!("../public/hedgehog.raw");
-
-        let char_data = match subdomain {
-          Some("xn--4o8h") => RABBIT_RAW,
-          Some("xn--yn8h") => RABBIT2_RAW,
-          Some("xn--dp8h") => FROG_RAW,
-          _ => HEDGEHOG_RAW,
+        let mut x = 0;
+        let mut y = 0;
+        let db = env.d1("game_db")?;
+        let char_data;
+        let char_id;
+        match subdomain {
+          Some("xn--4o8h") => {
+              char_data = RABBIT_RAW;
+              char_id = 0;
+          }
+          Some("xn--yn8h") => {
+              char_data = RABBIT2_RAW;
+              char_id = 1;
+          }
+          Some("xn--dp8h") => {
+              char_data = FROG_RAW;
+              char_id = 2;
+          }
+          _ => {
+              char_data = HEDGEHOG_RAW;
+              char_id = 3;
+          }
         };
-        let mut canvas = MAP_RAW.to_vec();
-        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 10, 10);
-        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 89, 89);
-        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 170, 170);
-        // let bmp_bytes = encode_bmp_fast(&canvas, 72, 72);
-        // let bmp_size = bmp_bytes.len();
-        // return Ok(Response::from_bytes(bmp_bytes)?.with_headers(headers_with_bmp(bmp_size)));
 
+        let prep = db.prepare("UPDATE players SET x = x + 1 WHERE x < 250 AND id = ? RETURNING x, y");
+        let mut canvas = MAP_RAW.to_vec();
+
+        let row = db.batch(vec![
+            prep.bind(&[char_id.into()])?
+        ]).await?;
+
+        let results: Result<Vec<Position>, _> = row[0].results();
+        if let Ok([Position{x: new_x, y: new_y}]) = results.as_deref() {
+            console_log!("{:?}", results);
+            x = *new_x;
+            y = *new_y;
+        }
+        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, x, y);
         let png_bytes = encode_png_manual(&canvas, 250, 250);
         let png_size = png_bytes.len();
         return Ok(Response::from_bytes(png_bytes)?.with_headers(headers_with_png(png_size)));
@@ -104,47 +132,6 @@ fn fast_raw_overlay(base: &mut [u8], base_w: u32, top: &[u8], top_w: u32, top_h:
             // If alpha is 0.0, we do nothing (transparent)
         }
     }
-}
-
-// Minimal BMP encoder to save CPU (No compression)
-fn encode_bmp_fast(rgba_pixels: &[u8], width: u32, height: u32) -> Vec<u8> {
-        let pixel_data_size = rgba_pixels.len();
-    let file_size = 54 + pixel_data_size;
-    let mut bmp = Vec::with_capacity(file_size);
-
-    // --- FILE HEADER (14 bytes) ---
-    bmp.extend_from_slice(b"BM");          // Signature
-    bmp.extend_from_slice(&(file_size as u32).to_le_bytes()); // File size
-    bmp.extend_from_slice(&[0, 0, 0, 0]);  // Reserved
-    bmp.extend_from_slice(&54u32.to_le_bytes()); // Pixel data offset
-
-    // --- INFO HEADER (40 bytes) ---
-    bmp.extend_from_slice(&40u32.to_le_bytes()); // Header size
-    bmp.extend_from_slice(&(width as i32).to_le_bytes());
-    // Use negative height to indicate "Top-Down" order (standard for RGBA buffers)
-    bmp.extend_from_slice(&(-(height as i32)).to_le_bytes());
-    bmp.extend_from_slice(&1u16.to_le_bytes());  // Planes
-    bmp.extend_from_slice(&32u16.to_le_bytes()); // Bits per pixel (32 = RGBA)
-    bmp.extend_from_slice(&0u32.to_le_bytes());  // Compression (0 = None)
-    bmp.extend_from_slice(&(pixel_data_size as u32).to_le_bytes()); // Image size
-    bmp.extend_from_slice(&[0; 16]);             // Resolution & Colors (ignored)
-
-    // --- PIXEL DATA ---
-    // BMP expects BGRA. We must swap R and B from our RGBA buffer.
-    let mut bgra = rgba_pixels.to_vec();
-    for i in (0..bgra.len()).step_by(4) {
-        bgra.swap(i, i + 2);
-    }
-
-    bmp.extend_from_slice(&bgra);
-    bmp
-}
-
-fn headers_with_bmp(bmp_size: usize) -> Headers {
-    let mut h = Headers::new();
-    h.set("Content-Type", "image/bmp").unwrap();
-    h.set("Content-Length", &bmp_size.to_string()).unwrap();
-    h
 }
 
 fn encode_png_manual(rgba_pixels: &[u8], width: u32, height: u32) -> Vec<u8> {
@@ -217,7 +204,7 @@ fn write_chunk(png: &mut Vec<u8>, name: &[u8; 4], data: &[u8]) {
 }
 
 fn headers_with_png(png_size: usize) -> Headers {
-    let mut h = Headers::new();
+    let h = Headers::new();
     h.set("Content-Type", "image/png").unwrap();
     h.set("Content-Length", &png_size.to_string()).unwrap();
     h
