@@ -46,6 +46,8 @@ async fn fetch(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         };
         let mut canvas = MAP_RAW.to_vec();
         fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 10, 10);
+        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 89, 89);
+        fast_raw_overlay(&mut canvas, 250, &char_data, 72, 72, 170, 170);
         // let bmp_bytes = encode_bmp_fast(&canvas, 72, 72);
         // let bmp_size = bmp_bytes.len();
         // return Ok(Response::from_bytes(bmp_bytes)?.with_headers(headers_with_bmp(bmp_size)));
